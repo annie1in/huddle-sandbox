@@ -1,6 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import TopBar from "./components/navigation/TopBar";
-import BottomNav from "./components/navigation/BottomNav";
+import { Routes, Route } from "react-router-dom";
+
+import AppLayout from "./layouts/AppLayout";
+import AuthLayout from "./layouts/AuthLayout";
 
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
@@ -12,52 +13,29 @@ import StudyGroupInfo from "./pages/study-groups/StudyGroupInfo";
 import StudyGroupCreate from "./pages/study-groups/StudyGroupCreate";
 import Insights from "./pages/Insights";
 
-
 function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/study-spots" element={<StudySpotDiscovery />} />
-          <Route path="/study-spots/info" element={<StudySpotInfo />} />
-          <Route path="/study-spots/log" element={<StudySessionLog />} />
-          <Route path="/study-groups" element={<StudyGroupDiscovery />} />
-          <Route path="/study-groups/info" element={<StudyGroupInfo />} />
-          <Route path="/study-groups/create" element={<StudyGroupCreate />} />
-          <Route path="/insights" element={<Insights />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <Routes>
+
+      {/* Auth pages (NO nav) */}
+      <Route element={<AuthLayout />}>
+        <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+      </Route>
+
+      {/* App pages (WITH nav) */}
+      <Route element={<AppLayout />}>
+        <Route path="/study-spots" element={<StudySpotDiscovery />} />
+        <Route path="/study-spots/info" element={<StudySpotInfo />} />
+        <Route path="/study-spots/log" element={<StudySessionLog />} />
+        <Route path="/study-groups" element={<StudyGroupDiscovery />} />
+        <Route path="/study-groups/info" element={<StudyGroupInfo />} />
+        <Route path="/study-groups/create" element={<StudyGroupCreate />} />
+        <Route path="/insights" element={<Insights />} />
+      </Route>
+
+    </Routes>
   );
 }
 
 export default App;
-
-/** NOTE:
- * StudySpotInfo and StudyGroupInfo are currently STATIC ROUTES
- * We'll change them to DYNAMIC ROUTES later to display different content based on URL parameters!
- * ex: "/study-spots/:id" "/study-groups/:id"
- */
-
-
-
-/** IGNORE: Determines when TopBar and BottomNav are shown. */
-
-function Layout({ children }) {
-  const location = useLocation();
-
-  const noNavPages = ["/", "/signup"];   // list of paths where nav bars should be hidden
-  const hideNav = noNavPages.includes(location.pathname);
-
-  return (
-    <div className="min-h-screen">
-      {!hideNav && <TopBar />}
-      <div className={!hideNav ? "pt-14 pb-14" : ""}>
-        {children}
-      </div>
-      {!hideNav && <BottomNav />}
-    </div>
-  );
-}
