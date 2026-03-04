@@ -9,7 +9,7 @@ export default function TopBar() {
                         <button> <img src="/cat.webp" className="w-6 h-6 ml-4 cursor-pointer"/> </button>
                     </Link>
                     <Link to="/">
-                        <buttton> <span className="text-lg font-bold text-red-500">huddle but uglier and with cats 😻😻</span> </buttton>
+                        <buttton> <span className="text-lg font-bold text-red-500">Huddle</span> </buttton>
                     </Link>
                 </div>
             </div>
