@@ -1,8 +1,26 @@
+import { useParams } from "react-router-dom";
+import { studyGroups } from "../../data/studyGroups";
+import Card from "../../components/ui/Card";
+
 export default function StudyGroupInfo() {
+  const { id } = useParams();
+
+  const group = studyGroups.find(
+    (g) => g.id === parseInt(id)
+  );
+
+  if (!group) {
+    return <div>Group not found</div>;
+  }
+
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold text-black">Study Group Info</h1>
-      <p className="text-gray-400 mb-6">This is where users will find information about a study group.</p>
+    <div className="min-h-screen bg-[#FFDC90] p-4 flex justify-center">
+      <div className="max-w-lg w-full flex flex-col gap-4">
+        <p className="text-lg font-semibold text-gray-800 text-center">
+          Ready to join? Confirm details below.
+        </p>
+        <Card data={group} buttonText="Join" />
+      </div>
     </div>
   );
 }
