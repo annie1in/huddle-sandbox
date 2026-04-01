@@ -50,7 +50,7 @@ const paceBadgeColor = (type) => {
   return "red";
 };
 
-export default function Card({ data, className = "" }) {
+export default function Card({ data, className = "", buttonText = "View" }) {
 const navigate = useNavigate();
   return (
     <div className="flex justify-center items-center w-full p-6">
@@ -184,13 +184,13 @@ const navigate = useNavigate();
         {/* VIEW BUTTON */}
         <button
           onClick={() => {
-            if (data.course) {
-              navigate("/study-groups/info");
-            }
+          if (data.id) {
+            navigate(`/study-groups/info/${data.id}`);
+          }
           }}
           className="bg-amber-300 hover:bg-amber-400 transition-colors text-gray-800 font-bold text-lg rounded-2xl py-3 w-1/2 self-center"
         >
-          View
+          {buttonText}
         </button>
 
       </div>
