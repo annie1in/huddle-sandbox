@@ -33,8 +33,8 @@ function App() {
         <Route path="/study-groups/create" element={<StudyGroupCreate />} />
         <Route path="/insights" element={<Insights />} />
       </Route>
-
     </Routes>
+
   );
 }
 

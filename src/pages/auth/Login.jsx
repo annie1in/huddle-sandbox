@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import Button from "../../components/ui/Button"
+import Modal from "../../components/ui/Modal"
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,7 +12,11 @@ export default function Login() {
       <div className="flex flex-col items-start space-y-4">
         <Button onClick={() => navigate("/signup")}>Sign Up</Button>
         <Button onClick={() => navigate("/study-spots")}>Log In</Button>
+        <Button>Test Modal</Button>
+        <Modal>test</Modal>
       </div>
+      
     </div>
   );
 }
+
