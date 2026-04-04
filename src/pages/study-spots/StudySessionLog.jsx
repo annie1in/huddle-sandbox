@@ -1,147 +1,215 @@
-import React, { useState } from "react";
-import { studySessions as initialSessions } from "../../data/studySessions";
+import { useState } from "react";
+import { useApp } from "../../context/AppContext";
+import { useParams, useNavigate } from "react-router-dom";
+import { studySpots } from "../../data/studySpots";
+import RateModal from "../../components/modals/RateModal";
 
 export default function StudySessionLog() {
-  const [sessions, setSessions] = useState(initialSessions);
+  const { addSession } = useApp(); 
+  const { id } = useParams(); // match the route param /study-spots/log/:id
+  const navigate = useNavigate();
+  const spot = studySpots.find(s => s.id === parseInt(id));
+
+  const [page, setPage] = useState(1);
   const [formData, setFormData] = useState({
-    spot: "",
     productivity: 0,
     comfort: 0,
     location: 0,
     recommend: null,
+    noiseLevel: "",
+    outlets: "",
+    lighting: "",
+    crowded: "",
+    comments: "",
+    overallRating: 0, // added for page 2 rating
   });
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-    setFormData({ ...formData, [name]: value });
-  }
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  function handleSelect(name, value) {
-    setFormData({ ...formData, [name]: value });
-  }
+  const handleSelect = (name, value) => setFormData({ ...formData, [name]: value });
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!spot) return;
 
-    const newSession = {
-      id: sessions.length + 1,
-      ...formData,
-    };
+    // Add session data
+    addSession({ ...formData, id: Date.now(), spot: spot.name });
 
-    setSessions([newSession, ...sessions]);
+    // Open modal instead of resetting form immediately
+    setIsModalOpen(true);
+  };
 
-    setFormData({
-      spot: "",
-      productivity: 0,
-      comfort: 0,
-      location: 0,
-      recommend: null,
-    });
-  }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    navigate("/study-spots/"); // go back to study spots discovery
+  };
 
   return (
-    <div className="flex flex-col items-center bg-gray-50 min-h-screen py-10">
-      <form
-        onSubmit={handleSubmit}
-        className="w-96 h-[874px] relative bg-[radial-gradient(ellipse_at_50%_50%,_#FFB000_0%,_#FFDC90_81%,_#FFECC1_100%)] overflow-hidden rounded-[40px] shadow-2xl"
+    <div className="flex justify-center items-start min-h-screen bg-white">
+      <div
+        className="w-96 h-screen relative
+                   bg-[radial-gradient(ellipse_at_50%_50%,_#FFB000_0%,_#FFDC90_81%,_#FFECC1_100%)]
+                   shadow-2xl overflow-y-auto flex flex-col items-center"
       >
-        <div className="absolute left-[20px] top-[60px] text-5xl font-['Marcellus_SC']">
-          Huddle
-        </div>
+        <h1 className="absolute left-6 top-6 text-5xl font-['Marcellus_SC'] text-black">Huddle</h1>
 
-        <div className="w-80 h-[540px] left-[32px] top-[180px] absolute bg-white rounded-3xl p-6 shadow-sm overflow-y-auto">
-          <div className="mb-6">
-            <label className="block text-[10px] uppercase font-bold text-gray-400 mb-2">
-              Study Spot
-            </label>
-            <input
-              name="spot"
-              value={formData.spot}
-              onChange={handleChange}
-              placeholder="e.g. Doe Library"
-              className="w-full p-2 bg-blue-50 rounded-lg border border-blue-100 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+        <form
+          onSubmit={handleSubmit}
+          className="mt-28 mb-24 w-80 bg-white rounded-2xl p-6 flex flex-col gap-6 shadow-lg"
+        >
+          {/* Header */}
+          <h2 className="text-black text-lg font-medium font-['Jost']">
+            Rate {spot?.name || "Study Spot"}
+          </h2>
 
-          {["productivity", "comfort", "location"].map((field) => (
-            <div key={field} className="mb-6">
-              <label className="block text-[10px] uppercase font-bold text-gray-400 mb-2">
-                {field}
-              </label>
-              <div className="flex justify-between">
-                {[1, 2, 3, 4, 5].map((num) => (
+          {page === 1 && (
+            <>
+              {/* Numbered Ratings */}
+              {["productivity", "comfort", "location"].map((field) => (
+                <div key={field}>
+                  <label className="block mb-2 text-sm font-medium text-black font-['Jost']">
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                  </label>
+                  <div className="flex justify-between">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => handleSelect(field, num)}
+                        className={`w-9 h-9 rounded-full font-bold cursor-pointer ${
+                          formData[field] === num ? "bg-amber-300 text-black" : "bg-amber-100 text-black"
+                        }`}
+                        style={{ fontFamily: "'Jost', sans-serif" }}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {/* Recommend */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-black font-['Jost']">
+                  Recommend?
+                </label>
+                <div className="flex gap-4">
                   <button
-                    key={num}
                     type="button"
-                    onClick={() => handleSelect(field, num)}
-                    className={`w-9 h-9 rounded-full font-bold text-sm transition-all ${
-                      formData[field] === num
-                        ? "bg-blue-900 text-white"
-                        : "bg-amber-100"
+                    onClick={() => handleSelect("recommend", true)}
+                    className={`flex-1 py-2 rounded-xl font-bold cursor-pointer ${
+                      formData.recommend === true ? "bg-amber-300 text-black" : "bg-amber-100 text-black"
                     }`}
                   >
-                    {num}
+                    Yes
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => handleSelect("recommend", false)}
+                    className={`flex-1 py-2 rounded-xl font-bold cursor-pointer ${
+                      formData.recommend === false ? "bg-amber-300 text-black" : "bg-amber-100 text-black"
+                    }`}
+                  >
+                    No
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
 
-          <div className="mb-6">
-            <label className="block text-[10px] uppercase font-bold text-gray-400 mb-2">
-              Recommend?
-            </label>
-            <div className="flex gap-4">
+              {/* Next Button */}
               <button
                 type="button"
-                onClick={() => handleSelect("recommend", true)}
-                className={`flex-1 py-2 rounded-xl font-bold text-xs ${
-                  formData.recommend === true
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-100"
-                }`}
+                onClick={() => setPage(2)}
+                className="w-full h-12 bg-sky-950 text-white rounded-3xl font-['Jost'] mt-4 cursor-pointer"
               >
-                Yes
+                Next
               </button>
-              <button
-                type="button"
-                onClick={() => handleSelect("recommend", false)}
-                className={`flex-1 py-2 rounded-xl font-bold text-xs ${
-                  formData.recommend === false
-                    ? "bg-red-600 text-white"
-                    : "bg-gray-100"
-                }`}
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
+            </>
+          )}
 
-        <button
-          type="submit"
-          className="w-32 h-10 left-[132px] top-[740px] absolute bg-blue-900 text-white rounded-full font-bold shadow-lg active:scale-95 transition-transform"
-        >
-          Submit
-        </button>
-      </form>
+          {page === 2 && (
+            <>
+              {/* Overall Rating (Page 2) */}
+              <div className="">
+                <label className="block mb-2 text-sm font-medium text-black font-['Jost']">
+                  Overall Rating
+                </label>
+                <div className="flex justify-between">
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => handleSelect("overallRating", num)}
+                      className={`w-9 h-9 rounded-full font-bold cursor-pointer ${
+                        formData.overallRating === num ? "bg-amber-300 text-black" : "bg-amber-100 text-black"
+                      }`}
+                      style={{ fontFamily: "'Jost', sans-serif" }}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-      <div className="mt-10 w-full max-w-sm px-4">
-        <h2 className="text-xl font-bold mb-4">Session History</h2>
-        {sessions.map((session) => (
-          <div
-            key={session.id}
-            className="bg-white p-4 rounded-xl shadow-sm border mb-3"
-          >
-            <p className="font-bold text-blue-900">{session.spot}</p>
-            <div className="flex text-xs gap-3 text-gray-500 mt-1">
-              <span>Prod: {session.productivity}</span>
-              <span>Comf: {session.comfort}</span>
-              <span>Loc: {session.location}</span>
-              <span>Rec: {session.recommend ? "✅" : "❌"}</span>
-            </div>
-          </div>
-        ))}
+              {/* Dropdown Ratings */}
+              {[
+                { label: "Noise Level", name: "noiseLevel", options: ["Silent", "Medium", "Loud"] },
+                { label: "Outlets", name: "outlets", options: ["Yes", "No"] },
+                { label: "Lighting", name: "lighting", options: ["Bright", "Medium", "Dim"] },
+                { label: "Crowded", name: "crowded", options: ["Low", "Medium", "High"] },
+              ].map((field) => (
+                <div key={field.name} className="flex flex-col gap-1">
+                  <label className="text-black text-sm font-medium font-['Jost']">{field.label}</label>
+                  <select
+                    name={field.name}
+                    value={formData[field.name]}
+                    onChange={handleChange}
+                    className="h-10 px-3 rounded-lg outline outline-gray-300 font-['Jost']"
+                  >
+                    <option value="">Select {field.label.toLowerCase()}</option>
+                    {field.options.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+
+              {/* Comments */}
+              <div className="flex flex-col gap-1 mt-4">
+                <label className="text-black text-sm font-medium font-['Jost']">Comments (optional)</label>
+                <textarea
+                  name="comments"
+                  value={formData.comments}
+                  onChange={handleChange}
+                  placeholder="Add your thoughts..."
+                  className="h-20 px-3 py-2 rounded-lg outline outline-gray-300 font-['Jost']"
+                />
+              </div>
+
+              {/* Back + Submit */}
+              <div className="flex gap-4 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setPage(1)}
+                  className="flex-1 h-12 bg-amber-100 rounded-3xl font-['Jost'] cursor-pointer"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 h-12 bg-sky-950 text-white rounded-3xl font-['Jost'] cursor-pointer"
+                >
+                  Submit
+                </button>
+              </div>
+            </>
+          )}
+        </form>
+
+        {/* Rating Modal */}
+        <RateModal studySpot={spot} isOpen={isModalOpen} onClose={handleCloseModal} />
       </div>
     </div>
   );

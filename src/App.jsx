@@ -25,11 +25,11 @@ function App() {
 
       {/* App pages (WITH nav) */}
       <Route element={<AppLayout />}>
-        <Route path="/study-spots" element={<StudySpotDiscovery />} />
-        <Route path="/study-spots/info" element={<StudySpotInfo />} />
-        <Route path="/study-spots/log" element={<StudySessionLog />} />
+        <Route path="/study-spots/" element={<StudySpotDiscovery />} />
+        <Route path="/study-spots/:id" element={<StudySpotInfo />} />
+        <Route path="/study-spots/log/:id" element={<StudySessionLog />} />
         <Route path="/study-groups" element={<StudyGroupDiscovery />} />
-        <Route path="/study-groups/info" element={<StudyGroupInfo />} />
+        <Route path="/study-groups/:id" element={<StudyGroupInfo />} />
         <Route path="/study-groups/create" element={<StudyGroupCreate />} />
         <Route path="/insights" element={<Insights />} />
       </Route>
