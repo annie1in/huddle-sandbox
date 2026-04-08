@@ -63,6 +63,11 @@ export default function StudySessionLog() {
             Rate {spot?.name || "Study Spot"}
           </h2>
 
+          {/* Rating key */}
+          <p className="text-xs text-gray-600 -mt-0.5">
+            1 = Poor / Low &nbsp;&nbsp;|&nbsp;&nbsp; 5 = Excellent / High
+          </p>
+
           {page === 1 && (
             <>
               {/* Numbered Ratings */}
